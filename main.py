@@ -3,6 +3,7 @@ import time
 
 from sensor_sdk import SensorManager as sm
 from sensor_sdk import data_classes as dc
+from sensor_sdk import sensor_config as sc
 
 # example implmentation of the sensor sdk
 # the sdk accepts messages
@@ -58,7 +59,9 @@ async def main():
     # create a sensor manager
     manager = sm.SensorManager()
     #initialise
-    done = await manager.init_sdk()
+    done = await manager.init_sdk("Movella Dot")
+
+    # set data rate or payload name via methods on SensorManager
 
     # callbacks that must be implemeted
     manager.on_sdk_init = on_sdk_init
@@ -73,6 +76,8 @@ async def main():
     if(done):
         manager.send_message("scan", {})
         done = False
+
+
         
 
 

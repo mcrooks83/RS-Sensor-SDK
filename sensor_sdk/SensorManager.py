@@ -5,6 +5,7 @@ import threading
 from sensor_sdk import helper_functions as hf
 from sensor_sdk import data_classes as dc
 from sensor_sdk import sensor_functions as sf
+from sensor_sdk import sensor_config as sc
 from sensor_sdk.rs_sdk import RSSensorSDK as SDK
 
 
@@ -17,11 +18,8 @@ class SensorManager(SDK):
         # sensor manager data
         self.scanned_sensors = []
         self.connected_sensors = []
-
-        # configuration
-        self.data_rate = 60
-
         self.running = False
+        self.export_dir = "export"
 
         # Create a thread to run the SensorManager
         thread = threading.Thread(target=self.run_manager_loop)
@@ -39,8 +37,13 @@ class SensorManager(SDK):
         print(f"Received message from client: {msg} from {address}")
         self.loop.call_soon_threadsafe(self.message_queue.put_nowait, {"message": msg, "address": address,})
        
-    async def init_sdk(self):
+    async def init_sdk(self, sensor_type):
+        # send in the sensor type (default is Movella Dot)
+        # create a sensor type class from the sensor_config
+        # dont create the SensorType here / or create a high level sensor type and a sensor config for each connected sensor
         print("initialising sensor sdk ...")
+        self.sensor_type = sc.SensorType(sensor_type)
+
         time.sleep(1)
         return True
     
@@ -65,6 +68,24 @@ class SensorManager(SDK):
     
     def on_message_error(self, message_error: dc.MessageError):
         return super().on_message_error(message_error)
+    
+    # sensor config access methods
+    def set_data_rate(self, rate):
+        self.sensor_type.set_data_rate(str(rate))
+    
+    def get_data_rate(self):
+        return int(self.sensor_type.get_data_rate())
+    
+    def set_payload(self, payload):
+        self.sensor_type.set_payload(payload)
+
+    def get_payload(self):
+        return self.sensor_type.get_payload()
+    
+    def get_sensor_type_config(self):
+        return self.sensor_type.get_sensor_config()
+    
+
 
     # class methods
     def add_scanned_sensors(self, s):
@@ -86,11 +107,7 @@ class SensorManager(SDK):
         connected_sensors = list(filter(lambda x: x.address != address, self.connected_sensors))
         self.connected_sensors = connected_sensors 
 
-    def set_data_rate(self, rate):
-        self.data_rate = rate
-    
-    def get_data_rate(self):
-        return self.data_rate
+
     
     # sdk event loop
     async def manager_loop(self):

@@ -58,8 +58,10 @@ async def main():
         print(f"message error: {error.error_message}")
     # create a sensor manager
     manager = sm.SensorManager()
-    #initialise
+    #initialise with sensor type names
     done = await manager.init_sdk("Movella Dot")
+
+    print("supported sensors", manager.get_supported_sensors())
 
     # set data rate or payload name via methods on SensorManager
 

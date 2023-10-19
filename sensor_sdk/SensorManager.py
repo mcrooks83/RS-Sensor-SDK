@@ -85,6 +85,12 @@ class SensorManager(SDK):
     def get_sensor_type_config(self):
         return self.sensor_type.get_sensor_config()
     
+    def get_supported_sensors(self):
+        supported_sensors = []
+        for k in sc.sensor_types:
+            supported_sensors.append(k)
+        return supported_sensors
+    
 
 
     # class methods
